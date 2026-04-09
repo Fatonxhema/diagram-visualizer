@@ -1,4 +1,3 @@
-import { startupSnapshot } from "v8";
 import { ParsedClass } from "./ParsedClass";
 
 export function parseJava(content: string): ParsedClass {
@@ -38,7 +37,7 @@ export function parseJava(content: string): ParsedClass {
       .replace(/\s*;\s*$/, "")
       .replace(/\s*=\s*.*$/, "");
 
-    processedFields.add(transformICollectionDeclarations(fieldName));
+    processedFields.add(fieldName);
     result.attributes.push(transformICollectionDeclarations(cleanField));
   }
 
@@ -57,7 +56,7 @@ export function parseJava(content: string): ParsedClass {
       .replace(/\s*\{\s*$/, "")
       .trim();
 
-    processedMethods.add(transformICollectionDeclarations(methodName));
+    processedMethods.add(methodName);
     result.methods.push(transformICollectionDeclarations(cleanMethod));
   }
 
@@ -68,7 +67,7 @@ export function parseCSharp(content: string): ParsedClass {
   const classRegex =
     /(?:public|internal|private|protected|\s)*\s*class\s+(\w+)(?:\s*:\s*[\w,\s]+)?/;
   const propertyRegex =
-    /(?:public|private|protected|internal|static|\s)*(?:[\w<>[\],\s]+)\s+(\w+)\s*\{(?:\s*get\s*(?:=>\s*[\w\s.\(\)]+\s*)?[;{]|\s*set\s*;|\s*init\s*;)*\s*\}/gm;
+    /(?:public|private|protected|internal|static|\s)*(?:[\w<>[\],\s]+)\s+(\w+)\s*\{(?:\s*get\s*(?:=>\s*[\w\s.\(\)]+\s*)?[;{]|\s*(?:private|protected|internal\s+protected|protected\s+internal)?\s*set\s*;|\s*(?:private|protected|internal\s+protected|protected\s+internal)?\s*init\s*;)*\s*\}/gm;
   const methodRegex =
     /(?:public|private|protected|internal|static|virtual|override|abstract|\s)* +[\w\<\>\[\],\s]+\s+(\w+)\s*\([^)]*\)\s*(?:where\s+[\w\s,:<>]+)?[;{]/gm;
 
@@ -100,7 +99,7 @@ export function parseCSharp(content: string): ParsedClass {
       .replace(/\s*\{\s*.*\s*\}\s*$/, " { get; set; }")
       .trim();
 
-    processedProperties.add(transformICollectionDeclarations(propertyName));
+    processedProperties.add(propertyName);
     result.attributes.push(transformICollectionDeclarations(cleanProperty));
   }
 
@@ -115,6 +114,7 @@ export function parseCSharp(content: string): ParsedClass {
     if (
       methodName === "get" ||
       methodName === "set" ||
+      methodName === "init" ||
       processedMethods.has(methodName)
     )
       continue;
@@ -125,7 +125,7 @@ export function parseCSharp(content: string): ParsedClass {
       .replace(/[;{]\s*$/, "")
       .trim();
 
-    processedMethods.add(transformICollectionDeclarations(methodName));
+    processedMethods.add(methodName);
     result.methods.push(transformICollectionDeclarations(cleanMethod));
   }
 
@@ -149,11 +149,11 @@ function transformICollectionDeclarations(line: string): string {
 
 /**
  * Removes all characters from the input string that are not alphanumeric
- * or one of the allowed special characters: +, -, #.
+ * or one of the allowed special characters: +, -, #, _, (, ), [, ], ,, ., :, <, >.
  *
  * @param input - The input string to sanitize.
  * @returns The sanitized string.
  */
 function sanitizeString(input: string): string {
-  return input.replace(/[^a-zA-Z0-9+#-]/g, " ");
+  return input.replace(/[^a-zA-Z0-9+#\-_ ()[\],.:<>]/g, " ");
 }
