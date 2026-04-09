@@ -67,7 +67,7 @@ export function parseCSharp(content: string): ParsedClass {
   const classRegex =
     /(?:public|internal|private|protected|\s)*\s*class\s+(\w+)(?:\s*:\s*[\w,\s]+)?/;
   const propertyRegex =
-    /(?:public|private|protected|internal|static|\s)*(?:[\w<>[\],\s]+)\s+(\w+)\s*\{(?:\s*get\s*(?:=>\s*[\w\s.\(\)]+\s*)?[;{]|\s*(?:private|protected|internal\s+protected|protected\s+internal)?\s*set\s*;|\s*(?:private|protected|internal\s+protected|protected\s+internal)?\s*init\s*;)*\s*\}/gm;
+    /(?:public|private|protected|internal|static|\s)*(?:[\w<>[\],\s]+)\s+(\w+)\s*\{[^{}]*\}/gm;
   const methodRegex =
     /(?:public|private|protected|internal|static|virtual|override|abstract|\s)* +[\w\<\>\[\],\s]+\s+(\w+)\s*\([^)]*\)\s*(?:where\s+[\w\s,:<>]+)?[;{]/gm;
 
